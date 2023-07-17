@@ -1,37 +1,17 @@
 package main
 
-import "fmt"
-
-func main() {
-	checks := GenerateCheck()
-	for _, service := range checks {
-		if service.status == PassStatus {
-			fmt.Println(service.ServiceID)
-		}
-	}
-}
-
-type HealthCheck struct {
-	ServiceID int
-	status    string
-}
-
-const (
-	PassStatus = "pass"
-	FailStatus = "fail"
+import (
+	"fmt"
 )
 
-func GenerateCheck() (checks []HealthCheck) {
-	for i := 0; i < 5; i++ {
-		check := HealthCheck{
-			ServiceID: i,
-		}
-		check.status = FailStatus
-		if i%2 == 0 {
-			check.status = PassStatus
-		}
-		checks = append(checks, check)
-	}
+func main() {
+	checker := NewChecker()
+	checker.Add(NewGoMetrClient("1", 1))
+	checker.Add(NewGoMetrClient("4", 1))
+	checker.Add(NewGoMetrClient("5", 1))
+	checker.Add(NewGoMetrClient("7", 1))
 
-	return checks
+	fmt.Println(checker)
+
+	checker.Check()
 }
