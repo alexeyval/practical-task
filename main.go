@@ -1,17 +1,27 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"time"
 )
 
 func main() {
-	checker := NewChecker()
-	checker.Add(NewGoMetrClient("1", 1))
-	checker.Add(NewGoMetrClient("4", 1))
-	checker.Add(NewGoMetrClient("5", 1))
-	checker.Add(NewGoMetrClient("7", 1))
+	parent := context.Background()
+	var checker = NewChecker(parent)
+	go checker.Add(NewGoMetrClient("1", 1))
+	go checker.Add(NewGoMetrClient("4", 1))
+	go checker.Add(NewGoMetrClient("5", 1))
+	go checker.Add(NewGoMetrClient("666", 1))
+	go checker.Add(NewGoMetrClient("7", 1))
 
-	fmt.Println(checker)
+	go func() {
+		for {
+			go checker.Add(NewGoMetrClient("7", 1))
+			time.Sleep(1 * time.Second)
+		}
+	}()
 
-	checker.Check()
+	go checker.Run()
+	time.Sleep(18 * time.Second)
+	checker.Stop()
 }
