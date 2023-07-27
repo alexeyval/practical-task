@@ -37,13 +37,17 @@ func (g *GoMetrClient) getHealth() HealthCheck {
 
 func (g *GoMetrClient) Health() (ok bool) {
 	ch := make(chan HealthCheck)
+	defer close(ch)
+	exit := make(chan struct{})
+	defer close(exit)
 
-	timeOut := false
 	go func() {
-		defer close(ch)
 		health := g.getHealth()
-		if !timeOut {
-			ch <- health
+
+		select {
+		case ch <- health:
+		case <-exit:
+			return
 		}
 	}()
 
@@ -53,7 +57,7 @@ func (g *GoMetrClient) Health() (ok bool) {
 		_, ok = dontID[id]
 	case <-time.After(time.Duration(g.timeOut) * time.Second):
 		fmt.Println("Time out")
-		timeOut = true
+		exit <- struct{}{}
 		return
 	}
 

@@ -22,6 +22,6 @@ func main() {
 	}()
 
 	go checker.Run()
-	time.Sleep(18 * time.Second)
+	time.Sleep(17 * time.Second)
 	checker.Stop()
 }
